@@ -24,11 +24,13 @@ secureTokenUsers=()
 # Loop through UUIDs of secure token holders
 for uuid in $(/usr/sbin/diskutil apfs listUsers / | /usr/bin/awk '/\+\-\-/ {print $2}'); do
     username="$(/usr/bin/dscl . -search /Users GeneratedUID "$uuid" | /usr/bin/awk 'NR==1{print $1}')"
-    
-    if /usr/sbin/dseditgroup -o checkmember -m "$username" admin &>/dev/null; then
-        secureTokenAdmins+=("$username")
-    else
-        secureTokenUsers+=("$username")
+
+    if [[ -n "$username" ]]; then
+        if /usr/sbin/dseditgroup -o checkmember -m "$username" admin &>/dev/null; then
+            secureTokenAdmins+=("$username")
+        else
+            secureTokenUsers+=("$username")
+        fi
     fi
 done
 
